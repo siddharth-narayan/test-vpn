@@ -1,6 +1,7 @@
 {
+  inputs.openssl-quantum.url = "github:siddharth-narayan/openssl-with-providers";
   outputs =
-    { nixpkgs, self }:
+    { nixpkgs, openssl-quantum, ... }:
     let
       pkgs = import nixpkgs { system = "x86_64-linux"; };
     in
@@ -9,7 +10,7 @@
         buildInputs = with pkgs; [
           meson
           ninja
-          openssl
+          openssl-quantum.packages.x86_64-linux.default
         ];
       };
     };
