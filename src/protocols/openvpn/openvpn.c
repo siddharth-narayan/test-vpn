@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "src/network/network.h"
+#include "src/util/print.h"
 
 void end_connection(SSL *ssl) {
     // End connection
@@ -60,12 +61,21 @@ SSL *create_openvpn_ssl(SSL_CTX *ctx) {
 }
 
 void openvpn_client_start(struct openvpn_client_config config) {
+    struct openvpn_client_state state;
 
     struct sockaddr_in address = config.server_address;
     int socket_type = config.socket_type;
 
     int sock = socket(address.sin_family, socket_type, 0);
-    connect(sock, (struct sockaddr *)&address, sizeof(address));
+    if (sock < 0) {
+        perror("Failed to open socket");
+        return;
+    }
+
+    if (connect(sock, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        perror("Failed to connect to server");
+        return;
+    }
 
     SSL_CTX *ctx = create_openvpn_ctx(false, NULL, NULL);
     SSL *ssl = create_openvpn_ssl(ctx);
@@ -73,16 +83,22 @@ void openvpn_client_start(struct openvpn_client_config config) {
     SSL_set_fd(ssl, sock);
     SSL_connect(ssl);
 
-    SSL_write(ssl, "heyyyy", 16);
+    if (init_tun_tap_device(&state.tt) < 0) {
+        return;
+    };
 
-    add_tun_device();
+    printf("sizeof(ssize_t) = %u", sizeof(ssize_t));
+
     while (1) {
         char buf[1024];
-        SSL_read(ssl, buf, sizeof(buf));
-        if (strncmp(buf, "exit\n", 5)) {
-            break;
-        }
+        memset(buf, '\0', sizeof(buf));
+
+        ssize_t len = read(state.tt.fd, buf, sizeof(buf) - 1);
+        printf("Read %lu bytes from tun: %s\n", len, buf);
+
+        SSL_write(ssl, buf, len);
     }
+
     end_connection(ssl);
 
     SSL_free(ssl);
@@ -157,7 +173,7 @@ void *openvpn_server_handle_client(void *entry) {
     char buf[1024];
     while (1) {
         memset(buf, '\0', sizeof(buf));
-        
+
         int len = SSL_read(ssl, buf, sizeof(buf));
 
         if (len <= 0) {
@@ -168,9 +184,11 @@ void *openvpn_server_handle_client(void *entry) {
             break;
         }
 
-        printf("Recieved: %s\n", buf);
+        printf("Recieved %u bytes:\n",len);
+        print_bytes(buf, len);
+        printf("\n");
     }
-    
+
     printf("Disconnecting from Client\n");
 
     end_connection(ssl);
