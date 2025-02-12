@@ -87,14 +87,12 @@ void openvpn_client_start(struct openvpn_client_config config) {
         return;
     };
 
-    printf("sizeof(ssize_t) = %u", sizeof(ssize_t));
-
     while (1) {
         char buf[1024];
         memset(buf, '\0', sizeof(buf));
 
         ssize_t len = read(state.tt.fd, buf, sizeof(buf) - 1);
-        printf("Read %lu bytes from tun: %s\n", len, buf);
+        printf("Sending %lu bytes from tun\n", len);
 
         SSL_write(ssl, buf, len);
     }
@@ -187,6 +185,8 @@ void *openvpn_server_handle_client(void *entry) {
         printf("Recieved %u bytes:\n",len);
         print_bytes(buf, len);
         printf("\n");
+
+        forward_packet_raw((uint8_t *)buf, len);
     }
 
     printf("Disconnecting from Client\n");
