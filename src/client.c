@@ -3,18 +3,24 @@
 #include <openssl/ssl.h>
 #include <stdio.h>
 
-#include "protocols/openvpn/openvpn.h"
+#include "protocols/tvpn/tvpn.h"
+#include "util/args.h"
 
 int main(int argc, char **argv) {
+    args args = { argc, argv };
+
     SSL_library_init();
     SSL_load_error_strings();
     
-    struct openvpn_client_config conf;
-    inet_aton("127.0.0.1", &conf.server_address.sin_addr);
+    struct tvpn_c_config conf;
+
+    inet_aton(argv[arg_parse_str(args, "-a")], &conf.server_address.sin_addr); // Address
+    arg_parse_uint(args, "-p", conf.server_address.sin_port); // Port
+    conf.server_address.sin_port = htons(conf.server_address.sin_port);  
+    
     conf.server_address.sin_family = AF_INET;
-    conf.server_address.sin_port = htons(1194);  
     conf.socket_type = SOCK_STREAM;
 
-    openvpn_client_start(conf);
+    tvpn_c_start(conf);
     return 0;
 }

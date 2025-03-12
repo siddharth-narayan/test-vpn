@@ -1,28 +1,12 @@
 #pragma once
-#include <netinet/in.h>
+
 #include <stdint.h>
-#include <sys/socket.h>
-#include <openssl/ssl.h>
-
-#include "src/network/network.h"
-
-struct openvpn_client_config {
-    struct sockaddr_in server_address;
-    enum __socket_type socket_type; // TCP or UDP?
-};
-
-struct openvpn_server_config {
-    uint16_t port;
-    char *privkey;
-    char *certificate;
-    enum __socket_type socket_type; // TCP or UDP?
-};
 
 struct openvpn_server_state {
     uint8_t state[1000];
 };
 
-struct openvpn_client_state {
+struct openvpn_state {
     struct tun_tap_device tt;
     uint8_t state[1000];
 };
@@ -40,7 +24,7 @@ struct openvpn_packet {
     } optional_key;
 };
 
-enum openvpn_message_type {
+enum tvpn_message_type {
     UNUSED0,
     UNUSED1,
     UNUSED2,
@@ -53,7 +37,3 @@ enum openvpn_message_type {
     P_CONTROL_HARD_RESET_CLIENT_V2,
     P_CONTROL_HARD_RESET_SERVER_V2,
 };
-
-void openvpn_client_start(struct openvpn_client_config);
-void openvpn_server_start(struct openvpn_server_config);
-void *openvpn_server_handle_client(void *);

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include "protocols/openvpn/openvpn.h"
+#include "protocols/tvpn/tvpn.h"
 
 
 int main(int argc, char **argv) {
@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
 
     signal(SIGPIPE, SIG_IGN);
 
-    struct openvpn_server_config conf;
+    struct tvpn_s_config conf;
     // inet_aton("96.252.17.110", &conf.server_address.sin_addr);
     // conf.server_address.sin_family = AF_INET;
     conf.port = 1194;  
@@ -21,6 +21,6 @@ int main(int argc, char **argv) {
     conf.privkey = "key.pem";
     conf.certificate = "cert.pem";
     
-    openvpn_server_start(conf);
+    tvpn_s_start(conf);
     return 0;
 }

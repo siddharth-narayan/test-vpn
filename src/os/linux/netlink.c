@@ -1,13 +1,14 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdbool.h>
+#include <sys/socket.h>
+
 #include <linux/if.h>
 #include <linux/if_addr.h>
 #include <linux/if_tun.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
-#include <stdbool.h>
-#include <sys/socket.h>
 
 #include <stdint.h>
 #include <stdio.h>

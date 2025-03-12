@@ -3,10 +3,11 @@ project('test-vpn', 'c',
   default_options : ['warning_level=3'])
 
 sources = [
-  'src/protocols/openvpn/openvpn.c',
+  'src/protocols/tvpn/tvpn.c',
   'src/network/network.c',
   'src/os/linux/netlink.c',
-  'src/util/print.c'
+  'src/util/print.c',
+  'src/util/args.c'
   ]
 
 dependencies = dependency('openssl', version : '>3.0.0')
